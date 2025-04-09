@@ -168,7 +168,7 @@ RGB PathTracing::shade(bool intersected, Intersection isect, int depth) {
     BRDF *f = isect.f;
     
     // Russian Roullette
-    #define MIN_DEPTH 2
+    #define MIN_DEPTH 0
     //#define PROB (1./3.)
     #define P_CONTINUE 0.8f
     float cont = U_dist(rng);
