@@ -10,7 +10,7 @@
 
 #include "BRDF.hpp"
 #include "ImagePPM.hpp"
-#include "../Geometry/triangle.hpp"
+#include "Triangle.hpp"
 
 class DiffuseTexture: public BRDF {
 private:

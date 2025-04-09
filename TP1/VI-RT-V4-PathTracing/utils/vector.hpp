@@ -10,6 +10,8 @@
 
 #include <cmath>
 
+const float EPSILON=1e-3;
+
 class Vec2 {
 public:
     float u,v;
@@ -45,7 +47,7 @@ public:
     }
     // note that methods declared within the class are inline by default
     inline float norm () {
-        return std::sqrtf(X*X+Y*Y+Z*Z);
+        return std::sqrt(X*X+Y*Y+Z*Z);
     }
     inline float normSQ () const {
         return (X*X+Y*Y+Z*Z);
