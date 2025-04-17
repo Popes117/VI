@@ -168,20 +168,17 @@ RGB PathTracing::shade(bool intersected, Intersection isect, int depth) {
     BRDF *f = isect.f;
     
     // Russian Roullette
-    #define MIN_DEPTH 0
-    //#define PROB (1./3.)
-    #define P_CONTINUE 0.8f
-    float cont = U_dist(rng);
+    #define MIN_DEPTH 1
+    #define P_CONTINUE 0.2f
+    float cont=U_dist(rng);
     if (depth<MIN_DEPTH || cont < P_CONTINUE) {
 
-        // Randomly select one of the below with probability p
-        float const p = U_dist(rng);
-
-        float pdf[3],sum,cdf[3];
+        float pdf[3], sum, cdf[3];
+        
         pdf[0] = f->Ks.Y();
         pdf[1] = f->Kt.Y();
         pdf[2] = f->Kd.Y();
-
+        
         sum = pdf[0] + pdf[1] + pdf[2];
         pdf[0] /= sum;
         pdf[1] /= sum;
@@ -190,25 +187,32 @@ RGB PathTracing::shade(bool intersected, Intersection isect, int depth) {
         cdf[0] = pdf[0];
         cdf[1] = cdf[0] + pdf[1];
         cdf[2] = cdf[1] + pdf[2];
-
+        
+        float const rnd = U_dist(rng);
+        
             // if there is a specular component sample it
-        if (!f->Ks.isZero() && p < cdf[0]) {
-            color += specularReflection (isect, f, depth);
-            color = color / pdf[0];
+        if (!f->Ks.isZero() && rnd < cdf[0]) {
+            RGB c_aux;
+            c_aux = specularReflection (isect, f, depth);
+            c_aux /= pdf[0];
+            color += c_aux;
         }
             // if there is a specular component sample it
-        if (!f->Kt.isZero() && p < cdf[1]) {
-            color += specularTransmission (isect, f, depth);
-            color = color / pdf[1];
+        else if (!f->Kt.isZero() &&  rnd < cdf[1]) {
+            RGB c_aux;
+            c_aux = specularTransmission (isect, f, depth);
+            c_aux /= pdf[1];
+            color += c_aux;
         }
             // if there is a diffuse component sample it
             // do one bounce (do not recurse on indirect diffuse)
         else if (!f->Kd.isZero() && isect.r_type != DIFF_REFL) {
-            color += diffuseReflection (isect, f, depth);
-            color = color / pdf[2];
+            RGB c_aux;
+            c_aux = diffuseReflection (isect, f, depth);
+            c_aux /= pdf[2];
+            color += c_aux;
         }
-        if (depth >= MIN_DEPTH) color = color / P_CONTINUE;
-
+        if (depth>=MIN_DEPTH) color /= P_CONTINUE;
     }
     if (!f->Kd.isZero()) {
         //color += directLighting(scene, isect, f, rng, U_dist, UNIFORM_ONE);
