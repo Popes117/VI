@@ -14,17 +14,34 @@ static RGB direct_AmbientLight (AmbientLight * l, BRDF  *  f);
 static RGB direct_PointLight (PointLight  *  l, Scene *scene, Intersection isect, BRDF  *  f);
 static RGB direct_AreaLight (AreaLight * l, Scene *scene, Intersection isect, BRDF* f, float *r);
 
+float *baseP;
+float **areaP;
+
+void memoryAllocator(int numLights){
+     baseP = (float*)malloc(sizeof(float) * numLights);
+     areaP = (float**)malloc(sizeof(float*) * numLights); 
+     for(int i = 0; i < numLights; i++){
+        areaP[i] = (float*)malloc(sizeof(float)<<1);
+     }
+}
+
+void memoryDeallocator(int numLights){
+    free(baseP);
+    for(int i = 0; i < numLights; i++){
+        free(areaP[i]);
+    }
+    free(areaP);
+}
+
 RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng, std::uniform_real_distribution<float>U_dist, DIRECT_SAMPLE_MODE mode) {
     RGB color (0.,0.,0.);
     //only works with areaLights
     if(mode==UNIFORM_ONE){
-        float *baseP = (float*)malloc(sizeof(float) * scene->numLights);
-        float **areaP = (float**)malloc(sizeof(float*) * scene->numLights);
+       // versão com cálculo aproximado da contribuição da luz
         int i = 0;
         float sum = 0;
         for (Light* l : scene->lights) {
             AreaLight *al = (AreaLight*)l;
-            areaP[i] = (float*)malloc(2 * sizeof(float));
             areaP[i][0] = U_dist(rng);
             areaP[i][1] = U_dist(rng);
             float pdf, cosL,  cosLN_l, Ldistance;
@@ -34,11 +51,13 @@ RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng
             // the pdf computed above is just 1/Area
             Vector Ldir=isect.p.vec2point(Lpos);
             Ldir.normalize();
-            cosL = Ldir.dot(isect.sn);
-            cosLN_l = -1.f * Ldir.dot(al->gem->normal);
+            cosL = 1.0f;
+            cosLN_l = 1.0f;
+            //cosL = Ldir.dot(isect.sn);
+            //cosLN_l = -1.f * Ldir.dot(al->gem->normal);
             if (cosL > 0 && cosLN_l >0){
                 Ldistance = Ldir.norm();
-                baseP[i] = ((al->power.R + al->power.G + al->power.B) * cosL * cosLN_l * (1/pdf))/(Ldistance*Ldistance);
+                baseP[i] = ((al->power.R + al->power.G + al->power.B) * cosL * cosLN_l * al->gem->area())/(Ldistance*Ldistance);
                 sum += baseP[i];
             }else{
                 baseP[i] = 0;
@@ -54,12 +73,21 @@ RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng
             if(rand < accP) break;
         }
         color = direct_AreaLight((AreaLight*)scene->lights[k], scene, isect, f, areaP[k]) / baseP[k];
-        free(baseP);
-        i--;
-        for(;i>=0;i--){
-            free(areaP[i]);
-        }
-        free(areaP);
+        /* Modo completamente aleatório
+        float rand = U_dist(rng);
+        float accP =0;
+        float increment = 1 / scene->numLights;
+        for (Light* l : scene->lights) {
+            accP += increment;
+            if (rand < increment){
+                AreaLight *al = (AreaLight*)l;
+                float u[2];
+                u[0] = U_dist(rng);
+                u[1] = U_dist(rng);
+                color = direct_AreaLight(al, scene, isect, f, u) * scene->numLights;
+                break;
+            }
+        }*/
     }else{
     // Loop over scene's light sources
     for (Light* l : scene->lights) {

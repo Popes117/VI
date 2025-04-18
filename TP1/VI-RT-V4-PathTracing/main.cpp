@@ -15,6 +15,7 @@
 #include "WhittedShader.hpp"
 #include "DistributedShader.hpp"
 #include "PathTracingShader.hpp"
+#include "directLighting.hpp"
 #include "AmbientLight.hpp"
 #include "Sphere.hpp"
 #include "BuildScenes.hpp"
@@ -83,6 +84,7 @@ int main(int argc, const char * argv[]) {
     //shd = new AmbientShader(&scene, RGB(0.1,0.1,0.8));
     //shd = new WhittedShader(&scene, RGB(0.1,0.1,0.8));
     //shd = new DistributedShader(&scene, RGB(0.1,0.1,0.8));
+    memoryAllocator(scene.numLights);
     shd = new PathTracing(&scene, RGB(0.,0.,0.2));
     // declare the renderer
     int const spp=16;
@@ -96,7 +98,7 @@ int main(int argc, const char * argv[]) {
     
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-
+    memoryDeallocator(scene.numLights);
     // save the image
     img->Save("MyImage.ppm");
     

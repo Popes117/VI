@@ -21,5 +21,6 @@ typedef  enum {
 }    DIRECT_SAMPLE_MODE;
 
 RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng, std::uniform_real_distribution<float>U_dist, DIRECT_SAMPLE_MODE mode=ALL_LIGHTS);
-
+void memoryAllocator(int numLights);
+void memoryDeallocator(int numLights);
 #endif /* directLighting_hpp */
