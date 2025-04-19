@@ -50,10 +50,11 @@ RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng
             L = al->Sample_L(areaP[i], &Lpos, pdf);
             // the pdf computed above is just 1/Area
             Vector Ldir=isect.p.vec2point(Lpos);
+#if 1
             //Com cossenos
-            /*Ldir.normalize();
-            //float cosL = Ldir.dot(isect.sn);
-            //float cosLN_l = -1.f * Ldir.dot(al->gem->normal);
+            Ldir.normalize();
+            float cosL = Ldir.dot(isect.sn);
+            float cosLN_l = -1.f * Ldir.dot(al->gem->normal);
             
             if (cosL > 0 && cosLN_l >0){
                 Ldistance = Ldir.norm();
@@ -61,13 +62,14 @@ RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng
                 sum += baseP[i];
             }else{
                 baseP[i] = 0;
-            }*/
-
+            }
+#else
         //sem cossenos 
        Ldistance = Ldir.norm();
        baseP[i] = ((al->power.R + al->power.G + al->power.B) * al->gem->area())/(Ldistance*Ldistance);
        sum += baseP[i];
        //
+#endif
        i++;
         }
 
