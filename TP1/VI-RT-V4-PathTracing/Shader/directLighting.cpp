@@ -44,25 +44,33 @@ RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng
             AreaLight *al = (AreaLight*)l;
             areaP[i][0] = U_dist(rng);
             areaP[i][1] = U_dist(rng);
-            float pdf, cosL,  cosLN_l, Ldistance;
+            float pdf, Ldistance;
             RGB L;
             Point Lpos;
             L = al->Sample_L(areaP[i], &Lpos, pdf);
             // the pdf computed above is just 1/Area
             Vector Ldir=isect.p.vec2point(Lpos);
-            //Ldir.normalize();
-            //cosL = 1.0f;
-            //cosLN_l = 1.0f;
-            //cosL = Ldir.dot(isect.sn);
-            //cosLN_l = -1.f * Ldir.dot(al->gem->normal);
+            //Com cossenos
+            /*Ldir.normalize();
+            //float cosL = Ldir.dot(isect.sn);
+            //float cosLN_l = -1.f * Ldir.dot(al->gem->normal);
             
+            if (cosL > 0 && cosLN_l >0){
                 Ldistance = Ldir.norm();
-                baseP[i] = ((al->power.R + al->power.G + al->power.B) * al->gem->area())/(Ldistance*Ldistance);
-                //baseP[i] = ((al->power.R + al->power.G + al->power.B) * cosL * cosLN_l * al->gem->area())/(Ldistance*Ldistance);
+                baseP[i] = ((al->power.R + al->power.G + al->power.B) * cosL * cosLN_l * al->gem->area())/(Ldistance*Ldistance);
                 sum += baseP[i];
-            
-            i++;
+            }else{
+                baseP[i] = 0;
+            }*/
+
+        //sem cossenos 
+       Ldistance = Ldir.norm();
+       baseP[i] = ((al->power.R + al->power.G + al->power.B) * al->gem->area())/(Ldistance*Ldistance);
+       sum += baseP[i];
+       //
+       i++;
         }
+
         float rand = U_dist(rng);
         float accP =0;
         int k = 0;
@@ -72,7 +80,7 @@ RGB directLighting (Scene *scene, Intersection isect, BRDF *f, std::mt19937& rng
             if(rand < accP) break;
         }
         color = direct_AreaLight((AreaLight*)scene->lights[k], scene, isect, f, areaP[k]) / baseP[k];
-        /* Modo completamente aleatório
+        /* Modo completamente aleatório (comentar tudo o que está para cima)
         float rand = U_dist(rng);
         float accP =0;
         float increment = 1 / scene->numLights;
