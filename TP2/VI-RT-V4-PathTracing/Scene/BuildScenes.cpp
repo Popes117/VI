@@ -349,6 +349,7 @@ void DLightChallenge (Scene& scene) {
     int const green_mat = AddMat(scene, RGB (0., 0.1, 0.), RGB (0., 0.6, 0.), RGB (0., 0., 0.), RGB (0., 0., 0.));
     int const blue_mat = AddMat(scene, RGB (0., 0., 0.1), RGB (0., 0., 0.6), RGB (0., 0., 0.), RGB (0., 0., 0.));
     int const orange_mat = AddMat(scene, RGB (0.37, 0.24, 0.), RGB (0.66, 0.44, 0.), RGB (0., 0., 0.), RGB (0., 0., 0.));
+
     // Floor
     AddTriangle(scene, Point(552.8, 0.0, 0.0), Point(-100.0, 0.0, 0.0), Point(-100.0, 0.0, 859.2), white_mat);
     AddTriangle(scene, Point(549.6, 0.0, 859.2), Point(552.8, 0.0, 0.0), Point(-100.0, 0.0, 859.2), white_mat);
