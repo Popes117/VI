@@ -199,9 +199,9 @@ int main(int argc, const char * argv[]) {
     // Camera parameters for the simple scenes
     //const Point Eye ={0,0,0}, At={0,0,1};
     /* Cornell Box */
-    //CornellBox(scene);
+    CornellBox(scene);
     //DiffuseCornellBox(scene);
-    DLightChallenge(scene);
+    //DLightChallenge(scene);
     // Camera parameters for the Cornell Box
     const Point Eye ={280,265,-500}, At={280,260,0};
     const float deFocusRad = 0*3.14f/180.f;    // to radians
