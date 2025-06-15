@@ -7,8 +7,9 @@ APP_DIR  := $(BUILD)/apps
 SHELL	 := /bin/bash
 
 TARGET   := VI-RT-V4-PathTracing
+TINYXML := tinyxml2-master
 
-INCLUDE  := -I$(TARGET)/Camera/ -I$(TARGET)/Image -I$(TARGET)/Light -I$(TARGET)/Primitive -I$(TARGET)/Primitive/BRDF -I$(TARGET)/Primitive/Geometry -I$(TARGET)/Rays -I$(TARGET)/Renderer -I$(TARGET)/Scene -I$(TARGET)/Shader -I$(TARGET)/utils -I$(TARGET)/Image/ToneMapper -I$(TARGET)/Image/PostFilter
+INCLUDE  := -I$(TARGET)/Camera/ -I$(TARGET)/Image -I$(TARGET)/Light -I$(TARGET)/Primitive -I$(TARGET)/Primitive/BRDF -I$(TARGET)/Primitive/Geometry -I$(TARGET)/Rays -I$(TARGET)/Renderer -I$(TARGET)/Scene -I$(TARGET)/Shader -I$(TARGET)/utils -I$(TARGET)/Image/ToneMapper -I$(TARGET)/Image/PostFilter -I$(TINYXML)
 
 SRC      :=                      \
    $(wildcard $(TARGET)/*.cpp) \
@@ -19,6 +20,8 @@ SRC      :=                      \
    $(wildcard $(TARGET)/Renderer/*.cpp)         \
    $(wildcard $(TARGET)/Scene/*.cpp)         \
    $(wildcard $(TARGET)/Shader/*.cpp)         \
+   $(wildcard $(TARGET)/Matrix/*.cpp)         \
+   $(filter-out $(TINYXML)/xmltest.cpp, $(wildcard $(TINYXML)/*.cpp)) \
 
 OBJECTS  := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
 DEPENDENCIES \

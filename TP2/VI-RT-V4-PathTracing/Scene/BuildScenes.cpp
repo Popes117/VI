@@ -151,6 +151,7 @@ void CornellBox (Scene& scene) {
     int const mirror_mat = AddMat(scene, RGB (0., 0., 0.), RGB (0., 0., 0.), RGB (0.9, 0.9, 0.9), RGB (0., 0., 0.));
     int const glass_mat = AddMat(scene, RGB (0., 0., 0.), RGB (0., 0., 0.), RGB (0.2, 0.2, 0.2), RGB (0.9, 0.9, 0.9), 1.2);
     //int const glass_mat = AddPhongMat(scene, RGB (0., 0., 0.), RGB (0., 0., 0.), RGB (0.2, 0.2, 0.2), RGB (0.9, 0.9, 0.9), 1, 0.9);
+    
     // Floor
     AddTriangle(scene, Point(552.8, 0.0, 0.0), Point(0.0, 0.0, 0.0), Point(0.0, 0.0, 559.2), white_mat);
     AddTriangle(scene, Point(549.6, 0.0, 559.2), Point(552.8, 0.0, 0.0), Point(0.0, 0.0, 559.2), white_mat);
@@ -171,6 +172,7 @@ void CornellBox (Scene& scene) {
     // Right Wall Mirror
     AddTriangle(scene, Point(552, 50.0, 50.), Point(549, 50., 509.2), Point(549, 488.8, 509.2), mirror_mat);
     AddTriangle(scene, Point(552, 50.0, 50.), Point(552, 488.8, 50.), Point(549, 488.8, 509.2), mirror_mat);
+    
     // short block
     // top
     AddTriangleUV(scene, Point(130.0, 165.0,  65.0), Point( 82.0, 165.0, 225.0), Point(240.0, 165.0, 272.0), Vec2(0.,0.), Vec2(0.,1.), Vec2(1.,1.), uminho_text);

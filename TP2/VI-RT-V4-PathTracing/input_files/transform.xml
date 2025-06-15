@@ -42,7 +42,23 @@
                     <totalFrames n = "25" />
                     <models list = "[0]" />
                 </transform>
+			    <group>
+			    	<transform> 
+			    		<scale x="0.25" y="0.25" z="0.25" />
+                        <frame n = "2" />
+                        <totalFrames n = "30" />
+                        <models list = "[0,2]" />
+			    	</transform>
+			    </group>
 			</group>
 		</group>
-	</group>
+		<group>
+			<transform> 
+				<scale x="0.75" y="0.75" z="0.75" />
+                <frame n = "4" />
+                <totalFrames n = "20" />
+                <models list = "[0,1]" />
+			</transform>
+		</group>
+    </group>
 </world>

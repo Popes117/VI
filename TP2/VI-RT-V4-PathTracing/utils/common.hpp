@@ -49,6 +49,22 @@ struct Transform {
 
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Transform& t) {
+    os << "Transform(type: " << t.type
+       << ", angle: " << t.angle
+       << ", x: " << t.x << ", y: " << t.y << ", z: " << t.z
+       << ", frame: " << t.frame << ", totalFrames: " << t.totalFrames
+       << ", models_indexes: [";
+
+    for (size_t i = 0; i < t.models_indexes.size(); ++i) {
+        os << t.models_indexes[i];
+        if (i != t.models_indexes.size() - 1) os << ", ";
+    }
+
+    os << "])";
+    return os;
+}
+
 #endif
 
 class Group{
@@ -61,3 +77,17 @@ class Group{
 	Group():transforms(), groups(){}
 
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Group& g) {
+    os << "Group {\n";
+    os << "  Transforms:\n";
+    for (const auto& t : g.transforms) {
+        os << "    " << t << "\n";
+    }
+    os << "  Nested Groups: " << g.groups.size() << "\n";
+    for (size_t i = 0; i < g.groups.size(); ++i) {
+        os << "    Group[" << i << "]:\n" << g.groups[i];
+    }
+    os << "}\n";
+    return os;
+}

@@ -4,7 +4,7 @@
 #define M_PI 3.141592653589793238462643383279502884L
 #endif
 #include "matrix.hpp"
-
+#include <vector>
 using namespace std;
 
 Matrix::Matrix() {
@@ -19,6 +19,12 @@ Matrix::Matrix(float (*values)[4]) {
       this->data[i][j] = values[i][j];
     }
   }
+}
+
+Matrix::Matrix(int index){
+  // Cria matriz com indíce de ordem entre as outras matrizes
+  this->index = index;
+  this->data = generateIdentityMatrix();
 }
 
 void Matrix::print() {
@@ -43,7 +49,7 @@ float (*Matrix::generateIdentityMatrix())[4] {
   return idMatrix;
 }
 
-void Matrix::addRotation(float x, float y, float z, float angle) {
+void Matrix::addRotation(float x, float y, float z, float angle, int frame, int totalFrames, std::vector<int> models_indexes) {
   const float c = cos(angle);
   const float s = sin(angle);
   const float t = 1 - c;
@@ -70,24 +76,33 @@ void Matrix::addRotation(float x, float y, float z, float angle) {
   result[2][2] = zSquared + (1 - zSquared) * c;
 
   combineMatrices(result);
+  this->frame = frame;
+  this->totalFrames = totalFrames;
+  this->models_indexes = models_indexes;
   delete[] result;
 }
 
-void Matrix::addScale(float x, float y, float z) {
+void Matrix::addScale(float x, float y, float z, int frame, int totalFrames, std::vector<int> models_indexes) {
   float(*scaleMatrix)[4] = generateIdentityMatrix();
   scaleMatrix[0][0] = x;
   scaleMatrix[1][1] = y;
   scaleMatrix[2][2] = z;
   combineMatrices(scaleMatrix);
+  this->frame = frame;
+  this->totalFrames = totalFrames;
+  this->models_indexes = models_indexes;
   delete[] scaleMatrix;
 }
 
-void Matrix::addTranslation(float x, float y, float z) {
+void Matrix::addTranslation(float x, float y, float z, int frame, int totalFrames, std::vector<int> models_indexes) {
   float(*scaleMatrix)[4] = generateIdentityMatrix();
   scaleMatrix[0][3] = x;
   scaleMatrix[1][3] = y;
   scaleMatrix[2][3] = z;
   combineMatrices(scaleMatrix);
+  this->frame = frame;
+  this->totalFrames = totalFrames;
+  this->models_indexes = models_indexes;
   delete[] scaleMatrix;
 }
 // modifies the original
@@ -126,4 +141,3 @@ void Matrix::deleteMatrix() {
   delete[] this->data;
   delete this;
 }
-

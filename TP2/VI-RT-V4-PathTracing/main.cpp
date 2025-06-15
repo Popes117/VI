@@ -35,6 +35,28 @@
 Group og_group = Group();
 std::vector<Matrix> matrixes;
 
+std::vector<int> parseModelList(const char* listAttr) {
+    std::vector<int> models;
+    std::string listStr(listAttr);
+
+    // Remove os colchetes se existirem
+    if (!listStr.empty() && listStr.front() == '[' && listStr.back() == ']') {
+        listStr = listStr.substr(1, listStr.length() - 2);
+    }
+
+    std::stringstream ss(listStr);
+    std::string token;
+    while (std::getline(ss, token, ',')) {
+        try {
+            models.push_back(std::stoi(token));
+        } catch (...) {
+            std::cerr << "Erro ao converter token para int: " << token << std::endl;
+        }
+    }
+
+    return models;
+}
+
 // TODO (maybe) : TALVEZ TENHAS DE VER AQUI A CENA DE METER O TRATAMENTO DE FRAME, TOTALFRAMES E MODELS
 // DENTRO DO LOOP FOR ABAIXO 
 void processTransformElement(tinyxml2::XMLElement* transformElement, Group& og_group) {
@@ -58,16 +80,8 @@ void processTransformElement(tinyxml2::XMLElement* transformElement, Group& og_g
     if (modelsElem) {
         const char* list = modelsElem->Attribute("list");
         if (list) {
-            std::stringstream ss(list);
-            char ch;
-            int modelIndex;
-            while (ss >> ch) {
-                if (isdigit(ch)) {
-                    ss.putback(ch);
-                    ss >> modelIndex;
-                    models.push_back(modelIndex);
-                }
-            }
+            std::vector<int> parsedModels = parseModelList(list);
+            models.insert(models.end(), parsedModels.begin(), parsedModels.end());
         }
     }
 
@@ -108,21 +122,16 @@ void processGroupElement(tinyxml2::XMLElement* groupElement, Group& og_group) {
 
     for (tinyxml2::XMLElement* child = groupElement->FirstChildElement(); child; child = child->NextSiblingElement()) {
         const char* childName = child->Name();
- 
+
         if (strcmp(childName, "transform") == 0) {
-            
             processTransformElement(child, og_group);
         }
-
-        if (strcmp(childName, "group") == 0) {
-
+        else if (strcmp(childName, "group") == 0) {
             Group group_bla = Group();
-            
             processGroupElement(child, group_bla);
             og_group.groups.push_back(group_bla);
         }
     }
-
 }
 
 void processWorldElement(tinyxml2::XMLElement* worldElement) {
@@ -154,25 +163,26 @@ int parsexml(const char *filename) {
 }
 
 // TODO : VER COMO TRATAR DOS FRAME, TOTALFRAMES E MODELS
-void handle_groups(const Group& group) {
+void handle_groups(const Group& group, int index) {
     
-    Matrix m = Matrix();
+    Matrix m = Matrix(index);
 
     for (const auto& transform : group.transforms) {
+
         if (transform.type == "translate") {
-            m.addTranslation(transform.x, transform.y, transform.z);
+            m.addTranslation(transform.x, transform.y, transform.z, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         } else if (transform.type == "rotate") {
-            m.addRotation(transform.x, transform.y, transform.z, transform.angle);
+            m.addRotation(transform.x, transform.y, transform.z, transform.angle, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         } else if (transform.type == "scale") {
-            m.addScale(transform.x, transform.y, transform.z);
+            m.addScale(transform.x, transform.y, transform.z, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         }
     }
 
     for (const auto& sub_group : group.groups) {
-        handle_groups(sub_group);
+        handle_groups(sub_group, index + 1);
     }
 
 }
@@ -184,6 +194,15 @@ int main(int argc, const char * argv[]) {
     clock_t start, end;
     double cpu_time_used;
     
+    parsexml("../../VI-RT-V4-PathTracing/input_files/transform.xml");
+
+    handle_groups(og_group,0);
+
+    //std::cout << "Number of matrixes: " << matrixes.size() << std::endl;
+    //for (const auto& m : matrixes) {
+    //    std::cout << m << std::endl;
+    //}
+
     // Image resolution
     const int W= 640;
     const int H= 640;
