@@ -22,6 +22,7 @@
 #include "AmbientShader.hpp"
 #include "WhittedShader.hpp"
 #include "DistributedShader.hpp"
+#include "EnvironmentShader.hpp"
 #include "PathTracingShader.hpp"
 #include "directLighting.hpp"
 #include "AmbientLight.hpp"
@@ -29,7 +30,7 @@
 #include "BuildScenes.hpp"
 #include <time.h>
 #include "../tinyxml2-master/tinyxml2.h"
-#include "utils/common.hpp"
+include "utils/common.hpp"
 #include "Matrix/matrix.hpp"
 
 Group og_group = Group();
@@ -218,13 +219,16 @@ int main(int argc, const char * argv[]) {
     // Camera parameters for the simple scenes
     //const Point Eye ={0,0,0}, At={0,0,1};
     /* Cornell Box */
-    CornellBox(scene);
+    //CornellBox(scene);
     //DiffuseCornellBox(scene);
     //DLightChallenge(scene);
+
+    /* Camera */
     // Camera parameters for the Cornell Box
-    const Point Eye ={280,265,-500}, At={280,260,0};
-    const float deFocusRad = 0*3.14f/180.f;    // to radians
-    const float FocusDist = 1.;
+    //const Point Eye ={280,265,-500}, At={280,260,0};
+    //const float deFocusRad = 0*3.14f/180.f;    // to radians
+    //const float FocusDist = 1.;
+
     //const float deFocusRad = 2.5*3.14f/180.f;    // to radians
     //const float FocusDist = 800.;
     //const Point Eye ={0,325,0}, At={560,345,350};
@@ -241,7 +245,15 @@ int main(int argc, const char * argv[]) {
     const float deFocusRad = 5.*3.14f/180.f;    // to radians
     const float FocusDist = 5.;*/
 
-    const Vector Up={0,1,0};
+    /*Env Light Scene*/
+    EnvScene(scene);
+    const Point Eye = {400, 250, 900};
+    const Point At  = {250, 150, 250};
+
+    const float deFocusRad = 0.*3.14f/180.f;     // ligeiro desfoque
+    const float FocusDist = 600.f;
+
+    const Vector Up = {0, 1, 0};
     const float fovH = 60.f;
     const float fovHrad = fovH*3.14f/180.f;    // to radians
     //Perspective *cam = new Perspective(Eye, At, Up, W, H, fovHrad);
@@ -258,10 +270,11 @@ int main(int argc, const char * argv[]) {
     //shd = new AmbientShader(&scene, RGB(0.1,0.1,0.8));
     //shd = new WhittedShader(&scene, RGB(0.1,0.1,0.8));
     //shd = new DistributedShader(&scene, RGB(0.1,0.1,0.8));
+    shd = new EnvironmentShader(&scene, RGB(0.1,0.1,0.8));
     memoryAllocator(scene.numLights);
-    shd = new PathTracing(&scene, RGB(0.,0.,0.2));
+    //shd = new PathTracing(&scene, RGB(0.,0.,0.2));
     // declare the renderer
-    int const spp=16;
+    int const spp=40;
     
     bool const jitter=true;
     StandardRenderer myRender (cam, &scene, img, shd, spp, jitter);

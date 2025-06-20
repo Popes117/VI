@@ -75,5 +75,6 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Users/marta/OneDrive/Ambiente de Trabalho/LEI/4ano2sem/VI/trabalho/VI/TP2/tinyxml2-master"
 }

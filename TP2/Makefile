@@ -32,6 +32,7 @@ all:	build $(APP_DIR)/$(TARGET)
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(@D)
 	cp $(TARGET)/Image/*.ppm $(APP_DIR)
+	cp $(TARGET)/Image/*.hdr $(APP_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -MMD -o $@
 
 $(APP_DIR)/$(TARGET): $(OBJECTS)

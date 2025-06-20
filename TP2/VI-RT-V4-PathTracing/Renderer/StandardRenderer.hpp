@@ -9,6 +9,7 @@
 #define StandardRenderer_hpp
 
 #include "renderer.hpp"
+#include "EnvironmentShader.hpp"
 
 class StandardRenderer: public Renderer {
 private:

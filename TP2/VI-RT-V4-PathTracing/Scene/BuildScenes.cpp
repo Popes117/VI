@@ -497,3 +497,48 @@ void DeFocusTriScene (Scene& scene) {
     scene.numLights++;
     return ;
 }
+
+void EnvScene(Scene &scene){
+    int const white_mat = AddMat(scene, RGB (0.1, 0.1, 0.1), RGB (0.6, 0.6, 0.6), RGB (0., 0., 0.), RGB (0., 0., 0.));
+    int const red_mat = AddMat(scene, RGB (0.9, 0., 0.), RGB (0.4, 0., 0.), RGB (0., 0., 0.), RGB (0., 0., 0.));
+    int const glass_mat = AddMat(scene, RGB (0., 0., 0.), RGB (0., 0., 0.), RGB (0.2, 0.2, 0.2), RGB (0.9, 0.9, 0.9), 1.2);
+    int const mirror_mat = AddMat(scene, RGB (0., 0., 0.), RGB (0., 0., 0.), RGB (0.9, 0.9, 0.9), RGB (0., 0., 0.));
+    int const green_mat = AddDiffuseMat(scene, RGB (0.1, 0.9, 0.1));
+    int const orange_mat = AddMat(scene, RGB (0.37, 0.24, 0.), RGB (0.66, 0.44, 0.), RGB (0., 0., 0.), RGB (0., 0., 0.));
+
+    // Piso
+    AddTriangle(scene, Point(600, 0.0, 0.0), Point(-100.0, 0.0, 0.0), Point(-100.0, 0.0, 800.0), white_mat);
+    AddTriangle(scene, Point(600, 0.0, 800.0), Point(600, 0.0, 0.0), Point(-100.0, 0.0, 800.0), white_mat);
+
+    // Esfera grande de vidro
+    AddSphere(scene, Point(278., 100., 250.), 100., glass_mat);
+
+    // Esfera vermelha à esquerda
+    AddSphere(scene, Point(90., 60., 380.), 60., red_mat);
+
+    // Esfera reflexiva à direita
+    AddSphere(scene, Point(400., 60., 380.), 60., mirror_mat); 
+
+    // Esfera difusa ao fundo
+    AddSphere(scene, Point(60., 50., 100.), 50., green_mat);
+
+
+    //#define AREANOENV
+
+    #ifndef AREANOENV
+        EnvironmentLight *envLight = new EnvironmentLight("rnl_probe.hdr");
+        scene.lights.push_back(envLight);
+        scene.numLights++;
+    #else
+        for (int lll=-1 ; lll<1 ; lll++) {
+            AreaLight *a1 = new AreaLight(RGB(250000.,250000.,250000.), Point(250.+lll*150, 545., 250.+lll*150), Point(300.+lll*150, 545., 250.+lll*150), Point(300.+lll*150, 545., 300.+lll*150), Vector (0.,-1.,0.));
+                scene.lights.push_back(a1);
+                scene.numLights++;
+            AreaLight *a2 = new AreaLight(RGB(250000.,250000.,250000.), Point(250.+lll*150, 545., 250.+lll*150), Point(250.+lll*150, 545., 300.+lll*150), Point(300.+lll*150, 545., 300.+lll*150), Vector (0.,-1.,0.));
+                scene.lights.push_back(a2);
+                scene.numLights++;
+        }
+    #endif
+
+    return;
+}

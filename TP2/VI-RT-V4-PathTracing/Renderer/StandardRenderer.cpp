@@ -50,7 +50,11 @@ void StandardRenderer::Render () {
                 intersected = scene->trace(primary, &isect);
                 
                 // shade this intersection (shader) - remember: depth=0
-                color += shd->shade(intersected, isect, 0);
+                if (EnvironmentShader* dshd = dynamic_cast<EnvironmentShader*>(shd)) {
+                    color += dshd->shade(intersected, isect, 0, primary.dir);
+                } else {
+                    color += shd->shade(intersected, isect, 0); // fallback genérico
+                }
                 
                 /*  DEBUGGING */
                 

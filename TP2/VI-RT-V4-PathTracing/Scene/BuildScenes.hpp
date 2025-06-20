@@ -12,6 +12,7 @@
 #include "AmbientLight.hpp"
 #include "PointLight.hpp"
 #include "AreaLight.hpp"
+#include "EnvironmentLight.hpp"
 #include "Sphere.hpp"
 #include "triangle.hpp"
 #include "BRDF.hpp"
@@ -23,5 +24,6 @@ void DeFocusTriScene (Scene& scene);
 void CornellBox (Scene& scene);
 void DiffuseCornellBox (Scene& scene);
 void DLightChallenge (Scene& scene);
+void EnvScene(Scene &scene);
 
 #endif /* BuildScenes_hpp */
