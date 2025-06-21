@@ -28,6 +28,7 @@ public:
     bool SetLights (void) { return true; };
     bool trace (Ray r, Intersection *isect);
     bool visibility (Ray s, const float maxL);
+    void clear();
     int AddMaterial (BRDF *mat) {
         BRDFs.push_back (mat);
         numBRDFs++;

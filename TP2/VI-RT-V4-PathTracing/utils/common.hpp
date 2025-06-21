@@ -1,7 +1,8 @@
+#ifndef COMMON_HPP
+#define COMMON_HPP
+
 #include <vector>
 #include <cmath>
-#ifndef TEXTURE_H
-#define TEXTURE_H
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <IL/il.h>
@@ -65,8 +66,6 @@ inline std::ostream& operator<<(std::ostream& os, const Transform& t) {
     return os;
 }
 
-#endif
-
 class Group{
 	
 	public:
@@ -91,3 +90,15 @@ inline std::ostream& operator<<(std::ostream& os, const Group& g) {
     os << "}\n";
     return os;
 }
+
+struct Model {
+    std::vector<Point> vertices;
+    double radius;
+
+    Model(std::vector<Point> vertices, double radius) :
+        vertices(vertices), radius(radius) {}
+    Model(std::vector<Point> vertices) :
+        vertices(vertices), radius(0.0) {}
+};
+
+#endif // COMMON_HPP

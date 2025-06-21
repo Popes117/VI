@@ -16,12 +16,15 @@
 #include "Sphere.hpp"
 #include "triangle.hpp"
 #include "BRDF.hpp"
+#include "../utils/common.hpp"
+#include "../Matrix/matrix.hpp"
 
  void SpheresScene (Scene& scene, int const N_spheres);
  void SpheresTriScene (Scene& scene);
 void SingleTriScene (Scene& scene);
 void DeFocusTriScene (Scene& scene);
-void CornellBox (Scene& scene);
+void CornellBox (int frame, Scene& scene, std::vector<Model> &models, 
+                 std::vector<Matrix> &matrixes);
 void DiffuseCornellBox (Scene& scene);
 void DLightChallenge (Scene& scene);
 void EnvScene(Scene &scene);

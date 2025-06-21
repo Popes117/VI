@@ -93,3 +93,26 @@ bool Scene::visibility (Ray s, const float maxL) {
     }
     return visible;
 }
+
+void Scene::clear() {
+    // Deleta as primitivas
+    for (auto prim : prims) {
+        delete prim;
+    }
+    prims.clear();
+    numPrimitives = 0;
+
+    // Deleta os materiais
+    for (auto brdf : BRDFs) {
+        delete brdf;
+    }
+    BRDFs.clear();
+    numBRDFs = 0;
+
+    // Deleta as luzes
+    for (auto light : lights) {
+        delete light;
+    }
+    lights.clear();
+    numLights = 0;
+}

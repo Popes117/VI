@@ -1,64 +1,29 @@
 <world>
+	<frames>
+		<frame number = "40" />
+	</frames>
     <group> 
         <transform> 
-		    <translate x="0" y="0.75" z="0" />
-            <frame n = "1" />
+		    <translate x="0" y="1" z="0" />
+            <frame n = "2" />
             <totalFrames n = "20" />
-            <models list = "[0,1,2]" />
+            <models list = "[7]" />
         </transform>
-		<group>
-			<transform> 
-				<scale x="0.75" y="0.75" z="0.75" />
-                <frame n = "4" />
-                <totalFrames n = "20" />
-                <models list = "[0,1]" />
-			</transform>
-		</group>
-		<group> 
-			<transform> 
-				<translate x="0" y="1" z="0" />
-                <frame n = "3" />
-                <totalFrames n = "25" />
-                <models list = "[1]" />
-			</transform>
-			<group>
-				<transform> 
-					<scale x="0.25" y="0.25" z="0.25" />
-                    <frame n = "2" />
-                    <totalFrames n = "30" />
-                    <models list = "[0,2]" />
-				</transform>
-			</group>
-			<group>
-				<transform> 
-					<rotate angle="90" x="1" y="0" z="0" />
-                    <frame n = "7" />
-                    <totalFrames n = "25" />
-                    <models list = "[1,2]" />
-				</transform>
-                <transform>
-					<scale x="0.1" y="0.3" z="0.1" />
-                    <frame n = "2" />
-                    <totalFrames n = "25" />
-                    <models list = "[0]" />
-                </transform>
-			    <group>
-			    	<transform> 
-			    		<scale x="0.25" y="0.25" z="0.25" />
-                        <frame n = "2" />
-                        <totalFrames n = "30" />
-                        <models list = "[0,2]" />
-			    	</transform>
-			    </group>
-			</group>
-		</group>
-		<group>
-			<transform> 
-				<scale x="0.75" y="0.75" z="0.75" />
-                <frame n = "4" />
-                <totalFrames n = "20" />
-                <models list = "[0,1]" />
-			</transform>
-		</group>
-    </group>
+	</group>
+	<group>
+		<transform> 
+			<scale x="1.50" y="1.50" z="1.50" />
+            <frame n = "4" />
+            <totalFrames n = "20" />
+            <models list = "[8]" />
+		</transform>
+	</group>
+	<group>
+		<transform> 
+			<rotate angle="90" x="0" y="0" z="1" />
+            <frame n = "6" />
+            <totalFrames n = "25" />
+            <models list = "[6]" />
+		</transform>
+	</group> 
 </world>

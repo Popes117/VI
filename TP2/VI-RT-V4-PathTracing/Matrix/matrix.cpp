@@ -105,6 +105,7 @@ void Matrix::addTranslation(float x, float y, float z, int frame, int totalFrame
   this->models_indexes = models_indexes;
   delete[] scaleMatrix;
 }
+
 // modifies the original
 void Matrix::transformPoint(float *vector, int isPoint) {
   float(*result) = new float[4];
