@@ -185,21 +185,21 @@ int parsexml(const char *filename) {
     return 0;
 }
 
-// TODO : VER COMO TRATAR DOS FRAME, TOTALFRAMES E MODELS
 void handle_groups(const Group& group, int index) {
     
-    Matrix m = Matrix(index);
-
     for (const auto& transform : group.transforms) {
-        //TODO : Fazer divisão de matrizes aqui, antes de adicionar à lista de matrizes
         if (transform.type == "translate") {
+            Matrix m = Matrix(index);
             float dx = transform.x / transform.totalFrames;
             float dy = transform.y / transform.totalFrames;
             float dz = transform.z / transform.totalFrames;
             m.addTranslation(dx, dy, dz, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         } else if (transform.type == "rotate") {
+            Matrix m = Matrix(index);
+            std :: cout << "Angle: " << transform.angle << std::endl;
             float anglePerFrame = transform.angle / transform.totalFrames;
+            std ::cout << "Angle per frame: " << anglePerFrame << std::endl;
             m.addRotation(transform.x, transform.y, transform.z, anglePerFrame, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         } else if (transform.type == "scale") {
@@ -207,12 +207,13 @@ void handle_groups(const Group& group, int index) {
             //x = (x <= 0.0f) ? 1.0f : x;
             //y = (y <= 0.0f) ? 1.0f : y;
             //z = (z <= 0.0f) ? 1.0f : z;
+            Matrix m = Matrix(index);
 
             float scaleX = std::pow(transform.x, 1.0f / transform.totalFrames);
             float scaleY = std::pow(transform.y, 1.0f / transform.totalFrames);
             float scaleZ = std::pow(transform.z, 1.0f / transform.totalFrames); 
 
-            m.addScale(transform.x, transform.y, transform.z, transform.frame, transform.totalFrames, transform.models_indexes);
+            m.addScale(scaleX, scaleY, scaleZ, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         }
     }

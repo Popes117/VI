@@ -50,8 +50,9 @@ float (*Matrix::generateIdentityMatrix())[4] {
 }
 
 void Matrix::addRotation(float x, float y, float z, float angle, int frame, int totalFrames, std::vector<int> models_indexes) {
-  const float c = cos(angle);
-  const float s = sin(angle);
+  float angleRad = angle * M_PI / 180.0f;
+  const float c = cos(angleRad);
+  const float s = sin(angleRad);
   const float t = 1 - c;
   const float xSquared = x * x;
   const float ySquared = y * y;
