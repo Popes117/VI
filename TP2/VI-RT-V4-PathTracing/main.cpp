@@ -197,9 +197,7 @@ void handle_groups(const Group& group, int index) {
             matrixes.push_back(m);
         } else if (transform.type == "rotate") {
             Matrix m = Matrix(index);
-            std :: cout << "Angle: " << transform.angle << std::endl;
             float anglePerFrame = transform.angle / transform.totalFrames;
-            std ::cout << "Angle per frame: " << anglePerFrame << std::endl;
             m.addRotation(transform.x, transform.y, transform.z, anglePerFrame, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         } else if (transform.type == "scale") {
