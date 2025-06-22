@@ -34,7 +34,7 @@
 #include "utils/common.hpp"
 #include "Matrix/matrix.hpp"
 #include <chrono>
-
+#include <omp.h>
 #define ENV 1
 #define CORNELL_BOX 0
 
@@ -230,7 +230,7 @@ void handle_groups(const Group& group) {
 
 }
 
-void SceneSetup(int i, Scene& scene, Perspective* cam, ImagePPM* img, const std::vector<Model>& cornell_box_models, const std::vector<Matrix>& matrixes) {
+void SceneSetup(int i, float& total, Scene& scene, Perspective* cam, ImagePPM* img, const std::vector<Model>& cornell_box_models, const std::vector<Matrix>& matrixes) {
     Shader* shd;
     clock_t start, end;
     double cpu_time_used;
@@ -260,12 +260,15 @@ void SceneSetup(int i, Scene& scene, Perspective* cam, ImagePPM* img, const std:
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
     double elapsed_seconds = duration<double>(end_clock - start_clock).count();
 
+    total += elapsed_seconds;
+
     memoryDeallocator(scene.numLights);
 
     img->Save(("MyImage" + std::to_string(i) + ".ppm").c_str());
 
     fprintf(stdout, "CPU Rendering time = %.3lf secs\n\n", cpu_time_used);
     fprintf(stdout, "Rendering time = %.3lf secs\n\n", elapsed_seconds);
+    std::cout << "Image saved as MyImage" << i << std::endl;
     std::cout << "That's all, folks!" << std::endl;
     scene.clear();
 
@@ -300,7 +303,11 @@ int main(int argc, const char * argv[]) {
     Shader *shd;      
     clock_t start, end;
     double cpu_time_used;
-    
+
+    int num_cores = omp_get_num_procs();
+    std::cout << "Número de cores disponíveis: " << num_cores << std::endl;
+    std::cout << "Threads máximas suportadas: " << omp_get_max_threads() << std::endl;
+
     buildCornellBoxModels(cornell_box_models);
     buildEnvSceneModels(env_scene_models);
 
@@ -390,18 +397,20 @@ int main(int argc, const char * argv[]) {
     
     bool const jitter=true;
 
+    float total = 0.0;
+
     if(!checkXML(matrixes, env_scene_models)) {
         std::cerr << "Error: Invalid XML configuration." << std::endl;
         return 1;
     }
 
     EnvScene(0,scene, env_scene_models, matrixes);
-    SceneSetup(0, scene, cam, img, env_scene_models, matrixes);
+    SceneSetup(0, total, scene, cam, img, env_scene_models, matrixes);
 
     for(int i = 1; i < numberFrames; i++){
         
         EnvScene(i,scene, env_scene_models, matrixes);
-        SceneSetup(i, scene, cam, img, env_scene_models, matrixes);
+        SceneSetup(i, total, scene, cam, img, env_scene_models, matrixes);
 
     }
 
@@ -441,6 +450,8 @@ int main(int argc, const char * argv[]) {
     
     bool const jitter=true;
 
+    float total = 0.0;
+
     /*   Dummy */
     // create the shader
     //shd = new DummyShader(&scene, W, H);
@@ -460,16 +471,20 @@ int main(int argc, const char * argv[]) {
     }
 
     CornellBox(0,scene, cornell_box_models, matrixes);
-    SceneSetup(0, scene, cam, img, cornell_box_models, matrixes);
+    SceneSetup(0, total, scene, cam, img, cornell_box_models, matrixes);
 
     for(int i = 1; i < numberFrames; i++){
         
         CornellBox(i,scene, cornell_box_models, matrixes);
-        SceneSetup(i, scene, cam, img, cornell_box_models, matrixes);
+        SceneSetup(i, total, scene, cam, img, cornell_box_models, matrixes);
 
     }
 
 #endif
+
+    float average_run_time = total / numberFrames;
+
+    std::cout << "Average run time: " << average_run_time << " seconds" << std::endl;
 
     return 0;
 }

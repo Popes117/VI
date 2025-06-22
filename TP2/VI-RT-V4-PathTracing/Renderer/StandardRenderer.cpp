@@ -56,10 +56,8 @@ void StandardRenderer::Render () {
         }
 
         // feedback de progresso (melhor só uma thread)
-        #pragma omp critical
-        {
-            fprintf(stderr, "%d\r", y);
-            fflush(stderr);
-        }
+        fprintf(stderr, "%d\r", y);
+        fflush(stderr);
+        
     }
 }
