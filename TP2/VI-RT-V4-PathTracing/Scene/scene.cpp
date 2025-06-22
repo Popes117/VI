@@ -29,7 +29,9 @@ bool Scene::trace (Ray r, Intersection *isect) {
     curr_isect.pix_y = isect->pix_y = r.pix_y;
 
     if (numPrimitives==0) return false;
-    
+
+#if 1
+
     // iterate over all primitives
     for (auto prim_itr = prims.begin() ; prim_itr != prims.end() ; prim_itr++) {
        /* if (r.pix_x==320 && r.pix_y==240) {
@@ -72,9 +74,56 @@ bool Scene::trace (Ray r, Intersection *isect) {
         }
     }
     isect->r_type = r.rtype;
-    
+
+#else 
+
+    Intersection local_isect;
+    bool local_hit = false;
+
+    #pragma omp parallel for private(curr_isect) firstprivate(r) shared(BRDFs) schedule(dynamic)
+    for (int i = 0; i < prims.size(); i++) {
+        Intersection thread_isect;
+        if (prims[i]->g->intersect(r, &thread_isect)) {
+            #pragma omp critical
+            {
+                if (!intersection || thread_isect.depth < isect->depth) {
+                    intersection = true;
+                    *isect = thread_isect;
+                    isect->f = BRDFs[prims[i]->material_ndx];
+                }
+            }
+        }
+    }
+
+    isect->isLight = false;
+
+    #pragma omp parallel for private(curr_isect) firstprivate(r) schedule(dynamic)
+    for (int i = 0; i < lights.size(); i++) {
+        if (lights[i]->type == AREA_LIGHT) {
+            AreaLight* al = static_cast<AreaLight*>(lights[i]);
+            Intersection thread_isect;
+            if (al->gem->intersect(r, &thread_isect)) {
+                //#pragma omp critical
+                {
+                    if (!intersection || thread_isect.depth < isect->depth) {
+                        intersection = true;
+                        *isect = thread_isect;
+                        isect->isLight = true;
+                        isect->Le = al->L();
+                    }
+                }
+            }
+        }
+    }
+
+    isect->r_type = r.rtype;
+
+#endif
+
     return intersection;
 }
+
+#if 1
 
 // checks whether a point on a light source (distance maxL) is visible
 bool Scene::visibility (Ray s, const float maxL) {
@@ -93,6 +142,39 @@ bool Scene::visibility (Ray s, const float maxL) {
     }
     return visible;
 }
+
+#else 
+
+bool Scene::visibility(Ray s, const float maxL) {
+    bool visible = true;
+    Intersection curr_isect;
+
+    if (numPrimitives == 0) return true;
+
+    #pragma omp parallel shared(visible)
+    {
+        #pragma omp for
+        for (int i = 0; i < prims.size(); ++i) {
+            if (!visible) {
+                #pragma omp cancel for
+            }
+
+            Intersection local_isect;
+            if (prims[i]->g->intersect(s, &local_isect)) {
+                if (local_isect.depth < maxL) {
+                    #pragma omp critical
+                    visible = false;
+
+                    #pragma omp cancel for
+                }
+            }
+        }
+    }
+
+    return visible;
+}
+
+#endif
 
 void Scene::clear() {
     // Deleta as primitivas

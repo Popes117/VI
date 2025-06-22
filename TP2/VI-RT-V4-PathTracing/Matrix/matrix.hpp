@@ -6,7 +6,6 @@ class Matrix {
    public:
     Matrix();
     Matrix(float(*values)[4]);
-    Matrix(int index);
     void print();
     void addRotation(float x, float y, float z, float angle, int frame, int totalFrames, std::vector<int> models_indexes);
     void addScale(float x, float y, float z, int frame, int totalFrames, std::vector<int> models_indexes);
@@ -14,7 +13,6 @@ class Matrix {
     void transformPoint(float* vector, int isPoint = 1);
     void deleteMatrix();
     float(*data)[4];
-    int index;
     int frame;
     int totalFrames;
     std::vector<int> models_indexes;
@@ -45,7 +43,6 @@ inline std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     }
 
     // Imprimir frame e totalFrames
-    os << "Índice da matriz: " << m.index << "\n";
     os << "Frame atual: " << m.frame << "\n";
     os << "Total de frames: " << m.totalFrames << "\n";
 

@@ -1,5 +1,5 @@
 CXX      := g++ 
-CXXFLAGS := -std=c++11 -O3 -Wall
+CXXFLAGS := -std=c++11 -O3 -Wall -fopenmp
 LDFLAGS  := 
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects

@@ -547,7 +547,7 @@ void DeFocusTriScene (Scene& scene) {
     return ;
 }
 
-void EnvScene(Scene &scene){
+void EnvScene(int frame, Scene& scene, std::vector<Model>& models, std::vector<Matrix>& matrixes){
     int const white_mat = AddMat(scene, RGB (0.1, 0.1, 0.1), RGB (0.6, 0.6, 0.6), RGB (0., 0., 0.), RGB (0., 0., 0.));
     int const red_mat = AddMat(scene, RGB (0.9, 0., 0.), RGB (0.4, 0., 0.), RGB (0., 0., 0.), RGB (0., 0., 0.));
     int const glass_mat = AddMat(scene, RGB (0., 0., 0.), RGB (0., 0., 0.), RGB (0.2, 0.2, 0.2), RGB (0.9, 0.9, 0.9), 1.2);
@@ -555,21 +555,35 @@ void EnvScene(Scene &scene){
     int const green_mat = AddDiffuseMat(scene, RGB (0.1, 0.9, 0.1));
     int const orange_mat = AddMat(scene, RGB (0.37, 0.24, 0.), RGB (0.66, 0.44, 0.), RGB (0., 0., 0.), RGB (0., 0., 0.));
 
+    // Aplicação das transformações
+    matrixesCheck(frame, matrixes, models);
+
     // Piso
-    AddTriangle(scene, Point(600, 0.0, 0.0), Point(-100.0, 0.0, 0.0), Point(-100.0, 0.0, 800.0), white_mat);
-    AddTriangle(scene, Point(600, 0.0, 800.0), Point(600, 0.0, 0.0), Point(-100.0, 0.0, 800.0), white_mat);
+    Model& plane = models[0];
+    AddTriangle(scene, plane.vertices[0], plane.vertices[1], plane.vertices[2], white_mat);
+    AddTriangle(scene, plane.vertices[3], plane.vertices[0], plane.vertices[2], white_mat);
+    //AddTriangle(scene, Point(600, 0.0, 0.0), Point(-100.0, 0.0, 0.0), Point(-100.0, 0.0, 800.0), white_mat);
+    //AddTriangle(scene, Point(600, 0.0, 800.0), Point(600, 0.0, 0.0), Point(-100.0, 0.0, 800.0), white_mat);
 
     // Esfera grande de vidro
-    AddSphere(scene, Point(278., 100., 250.), 100., glass_mat);
+    Model& sphere1 = models[1];
+    AddSphere(scene, sphere1.vertices[0], sphere1.radius, glass_mat);
+    //AddSphere(scene, Point(278., 100., 250.), 100., glass_mat);
 
     // Esfera vermelha à esquerda
-    AddSphere(scene, Point(90., 60., 380.), 60., red_mat);
+    Model& sphere2 = models[2];
+    AddSphere(scene, sphere2.vertices[0], sphere2.radius, red_mat);
+    //AddSphere(scene, Point(90., 60., 380.), 60., red_mat);
 
     // Esfera reflexiva à direita
-    AddSphere(scene, Point(400., 60., 380.), 60., mirror_mat); 
+    Model& sphere3 = models[3];
+    AddSphere(scene, sphere3.vertices[0], sphere3.radius, mirror_mat);
+    //AddSphere(scene, Point(400., 60., 380.), 60., mirror_mat); 
 
     // Esfera difusa ao fundo
-    AddSphere(scene, Point(60., 50., 100.), 50., green_mat);
+    Model& sphere4 = models[4];
+    AddSphere(scene, sphere4.vertices[0], sphere4.radius, green_mat);
+    //AddSphere(scene, Point(60., 50., 100.), 50., green_mat);
 
 
     //#define AREANOENV

@@ -21,12 +21,6 @@ Matrix::Matrix(float (*values)[4]) {
   }
 }
 
-Matrix::Matrix(int index){
-  // Cria matriz com indíce de ordem entre as outras matrizes
-  this->index = index;
-  this->data = generateIdentityMatrix();
-}
-
 void Matrix::print() {
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {

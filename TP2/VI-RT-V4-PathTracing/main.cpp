@@ -33,6 +33,16 @@
 #include "../tinyxml2-master/tinyxml2.h"
 #include "utils/common.hpp"
 #include "Matrix/matrix.hpp"
+#include <chrono>
+
+#define ENV 1
+#define CORNELL_BOX 0
+
+//TROCAR AS VERSÕES DE RENDERIZAÇÃO AQUI, TENDO EM 
+//CONTA AS FLAGS ACIMA 
+#define FLAG CORNELL_BOX
+
+using namespace std::chrono;
 
 Group og_group = Group();
 std::vector<Matrix> matrixes;
@@ -62,8 +72,6 @@ std::vector<int> parseModelList(const char* listAttr) {
     return models;
 }
 
-// TODO (maybe) : TALVEZ TENHAS DE VER AQUI A CENA DE METER O TRATAMENTO DE FRAME, TOTALFRAMES E MODELS
-// DENTRO DO LOOP FOR ABAIXO 
 void processTransformElement(tinyxml2::XMLElement* transformElement, Group& og_group) {
     float tx = 0, ty = 0, tz = 0;
     float rx = 0, ry = 0, rz = 0, angle = 0;
@@ -185,18 +193,18 @@ int parsexml(const char *filename) {
     return 0;
 }
 
-void handle_groups(const Group& group, int index) {
+void handle_groups(const Group& group) {
     
     for (const auto& transform : group.transforms) {
         if (transform.type == "translate") {
-            Matrix m = Matrix(index);
+            Matrix m = Matrix();
             float dx = transform.x / transform.totalFrames;
             float dy = transform.y / transform.totalFrames;
             float dz = transform.z / transform.totalFrames;
             m.addTranslation(dx, dy, dz, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
         } else if (transform.type == "rotate") {
-            Matrix m = Matrix(index);
+            Matrix m = Matrix();
             float anglePerFrame = transform.angle / transform.totalFrames;
             m.addRotation(transform.x, transform.y, transform.z, anglePerFrame, transform.frame, transform.totalFrames, transform.models_indexes);
             matrixes.push_back(m);
@@ -205,7 +213,7 @@ void handle_groups(const Group& group, int index) {
             //x = (x <= 0.0f) ? 1.0f : x;
             //y = (y <= 0.0f) ? 1.0f : y;
             //z = (z <= 0.0f) ? 1.0f : z;
-            Matrix m = Matrix(index);
+            Matrix m = Matrix();
 
             float scaleX = std::pow(transform.x, 1.0f / transform.totalFrames);
             float scaleY = std::pow(transform.y, 1.0f / transform.totalFrames);
@@ -217,57 +225,84 @@ void handle_groups(const Group& group, int index) {
     }
 
     for (const auto& sub_group : group.groups) {
-        handle_groups(sub_group, index + 1);
+        handle_groups(sub_group);
     }
 
 }
 
-void CornellBoxSetup(int i, Scene& scene, Perspective* cam, ImagePPM* img, const std::vector<Model>& cornell_box_models, const std::vector<Matrix>& matrixes) {
+void SceneSetup(int i, Scene& scene, Perspective* cam, ImagePPM* img, const std::vector<Model>& cornell_box_models, const std::vector<Matrix>& matrixes) {
     Shader* shd;
     clock_t start, end;
     double cpu_time_used;
 
     memoryAllocator(scene.numLights);
 
+#if FLAG
+
+    shd = new EnvironmentShader(&scene, RGB(0.1,0.1,0.8));
+
+#else
+
     shd = new PathTracing(&scene, RGB(0., 0., 0.2));
 
+#endif
     const int spp = 16;
     const bool jitter = true;
 
     StandardRenderer myRender(cam, &scene, img, shd, spp, jitter);
 
+    auto start_clock = high_resolution_clock::now();
     start = clock();
     myRender.Render();
     end = clock();
+    auto end_clock = high_resolution_clock::now();
 
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    double elapsed_seconds = duration<double>(end_clock - start_clock).count();
 
     memoryDeallocator(scene.numLights);
 
     img->Save(("MyImage" + std::to_string(i) + ".ppm").c_str());
 
-    fprintf(stdout, "Rendering time = %.3lf secs\n\n", cpu_time_used);
+    fprintf(stdout, "CPU Rendering time = %.3lf secs\n\n", cpu_time_used);
+    fprintf(stdout, "Rendering time = %.3lf secs\n\n", elapsed_seconds);
     std::cout << "That's all, folks!" << std::endl;
-
     scene.clear();
 
-    delete shd; // Liberta o shader para evitar vazamento de memória
+    delete shd; 
+}
+
+bool checkXML(const std::vector<Matrix>& matrixes, const std::vector<Model>& models) {
+
+    for (const Matrix& m : matrixes) {
+        if (m.frame + m.totalFrames > numberFrames) {
+            std::cerr << "Error: Frame " << m.frame << " + totalFrames " << m.totalFrames
+                      << " exceeds the total number of frames in the XML file. "
+                      << numberFrames << "." << std::endl;
+            return false;
+        }
+
+        for (int index : m.models_indexes) {
+            if (index < 0 || index >= models.size()) {
+                std::cerr << "Error: Invalid index (" << index << ") in one or more matrixes. The Models vector has a size of " << models.size() << "." << std::endl;
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 
-#if 0
-
-// EnvScene
 int main(int argc, const char * argv[]) {
     Scene scene;
-    ImagePPM *img;    // Image
-    Shader *shd;      // Shader
+    ImagePPM *img;    
+    Shader *shd;      
     clock_t start, end;
     double cpu_time_used;
     
-    parsexml("../../VI-RT-V4-PathTracing/input_files/transform.xml");
-
-    handle_groups(og_group,0);
+    buildCornellBoxModels(cornell_box_models);
+    buildEnvSceneModels(env_scene_models);
 
     //std::cout << "Number of matrixes: " << matrixes.size() << std::endl;
     //for (const auto& m : matrixes) {
@@ -316,7 +351,14 @@ int main(int argc, const char * argv[]) {
     const float FocusDist = 5.;*/
 
     /*Env Light Scene*/
-    EnvScene(scene);
+    //EnvScene(scene);
+
+#if FLAG
+
+    parsexml("../../VI-RT-V4-PathTracing/input_files/transformEnv.xml");
+
+    handle_groups(og_group);
+
     const Point Eye = {400, 250, 900};
     const Point At  = {250, 150, 250};
 
@@ -340,70 +382,35 @@ int main(int argc, const char * argv[]) {
     //shd = new AmbientShader(&scene, RGB(0.1,0.1,0.8));
     //shd = new WhittedShader(&scene, RGB(0.1,0.1,0.8));
     //shd = new DistributedShader(&scene, RGB(0.1,0.1,0.8));
-    shd = new EnvironmentShader(&scene, RGB(0.1,0.1,0.8));
-    memoryAllocator(scene.numLights);
+    //shd = new EnvironmentShader(&scene, RGB(0.1,0.1,0.8));
+    //memoryAllocator(scene.numLights);
     //shd = new PathTracing(&scene, RGB(0.,0.,0.2));
     // declare the renderer
     int const spp=40;
     
     bool const jitter=true;
-    StandardRenderer myRender (cam, &scene, img, shd, spp, jitter);
-    // render
-    start = clock();
-    
-    myRender.Render();
-    
-    end = clock();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    memoryDeallocator(scene.numLights);
-    // save the image
-    img->Save("MyImage.ppm");
-    
-    fprintf (stdout, "Rendering time = %.3lf secs\n\n", cpu_time_used);
-    
-    std::cout << "That's all, folks!" << std::endl;
-    return 0;
-}
+
+    if(!checkXML(matrixes, env_scene_models)) {
+        std::cerr << "Error: Invalid XML configuration." << std::endl;
+        return 1;
+    }
+
+    EnvScene(0,scene, env_scene_models, matrixes);
+    SceneSetup(0, scene, cam, img, env_scene_models, matrixes);
+
+    for(int i = 1; i < numberFrames; i++){
+        
+        EnvScene(i,scene, env_scene_models, matrixes);
+        SceneSetup(i, scene, cam, img, env_scene_models, matrixes);
+
+    }
 
 #else 
 
-// CornellBox 
-int main(int argc, const char * argv[]) {
-    Scene scene;
-    ImagePPM *img;    // Image
-    Shader *shd;      // Shader
-    clock_t start, end;
-    double cpu_time_used;
-
-    buildCornellBoxModels(cornell_box_models);
-    buildEnvSceneModels(env_scene_models);
-
     parsexml("../../VI-RT-V4-PathTracing/input_files/transform.xml");
 
-    handle_groups(og_group,0);
+    handle_groups(og_group);
 
-    //std::cout << "Number of matrixes: " << matrixes.size() << std::endl;
-    //for (const auto& m : matrixes) {
-    //    std::cout << m << std::endl;
-    //}
-
-    // Image resolution
-    const int W= 640;
-    const int H= 640;
-
-    img = new ImagePPM(W,H);
-    
-    /* Scenes*/
-    
-    /* Single Sphere */
-    //SpheresScene(scene, 1);
-    /* Single Sphere and Triangles */
-    //SpheresTriScene(scene);
-    // Camera parameters for the simple scenes
-    //const Point Eye ={0,0,0}, At={0,0,1};
-    //DiffuseCornellBox(scene);
-    //DLightChallenge(scene);
-    // Camera parameters for the Cornell Box
     const Point Eye ={280,265,-500}, At={280,260,0};
     const float deFocusRad = 0*3.14f/180.f;    // to radians
     const float FocusDist = 1.;
@@ -447,17 +454,22 @@ int main(int argc, const char * argv[]) {
     //shd = new DistributedShader(&scene, RGB(0.1,0.1,0.8));
     /* Cornell Box */
 
+    if(!checkXML(matrixes, cornell_box_models)) {
+        std::cerr << "Error: Invalid XML configuration." << std::endl;
+        return 1;
+    }
+
     CornellBox(0,scene, cornell_box_models, matrixes);
-    CornellBoxSetup(0, scene, cam, img, cornell_box_models, matrixes);
+    SceneSetup(0, scene, cam, img, cornell_box_models, matrixes);
 
     for(int i = 1; i < numberFrames; i++){
         
         CornellBox(i,scene, cornell_box_models, matrixes);
-        CornellBoxSetup(i, scene, cam, img, cornell_box_models, matrixes);
+        SceneSetup(i, scene, cam, img, cornell_box_models, matrixes);
 
     }
 
+#endif
+
     return 0;
 }
-
-#endif

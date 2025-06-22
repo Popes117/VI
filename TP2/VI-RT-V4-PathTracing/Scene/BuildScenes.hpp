@@ -27,6 +27,6 @@ void CornellBox (int frame, Scene& scene, std::vector<Model> &models,
                  std::vector<Matrix> &matrixes);
 void DiffuseCornellBox (Scene& scene);
 void DLightChallenge (Scene& scene);
-void EnvScene(Scene &scene);
+void EnvScene(int frame, Scene& scene, std::vector<Model>& models, std::vector<Matrix>& matrixes);
 
 #endif /* BuildScenes_hpp */

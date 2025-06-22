@@ -7,64 +7,59 @@
 
 #include "StandardRenderer.hpp"
 #include <random>
+#include <omp.h>
 
 void StandardRenderer::Render () {
-    int W=0,H=0;  // resolution
-    int x,y, s;
-    
-    /****************************************
-     
-     Our Random Number Generator (rng) */
+    int W = 0, H = 0;  // resolução
+    int x, y, s;
+
     std::random_device rdev{};
     std::mt19937 rng{rdev()};
-    std::uniform_real_distribution<float>U_dist{0.0,1.0};  // uniform distribution in[0,1[
+    std::uniform_real_distribution<float> U_dist{0.0, 1.0};  // distribuição uniforme [0,1[
 
-
-    // get resolution from the camera
     cam->getResolution(&W, &H);
-    float const sppf = 1.f/spp;
+    float const sppf = 1.f / spp;
 
-    // main rendering loop: get primary rays from the camera until done
-    for (y=0 ; y< H ; y++) {  // loop over rows
-        fprintf (stderr,"%d\r",y);
-        fflush (stderr);
-        for (x=0 ; x< W ; x++) { // loop over columns
-            RGB color(0.,0.,0.);
-            
-            for (s=0 ; s < spp; s++) {
+    // PARALLEL FOR
+    #pragma omp parallel for private(x, s) schedule(dynamic)
+    for (y = 0; y < H; y++) {
+        std::mt19937 local_rng(rdev()); // rng por thread (não compartilha!)
+        std::uniform_real_distribution<float> local_U_dist{0.0, 1.0};
+
+        for (x = 0; x < W; x++) {
+            RGB color(0., 0., 0.);
+
+            for (s = 0; s < spp; s++) {
                 Ray primary;
                 Intersection isect;
                 bool intersected;
-                // Generate Ray (camera)
                 float jitterV[2];
-                
+
                 if (jitter) {
-                    jitterV[0] = U_dist(rng);
-                    jitterV[1] = U_dist(rng);
+                    jitterV[0] = local_U_dist(local_rng);
+                    jitterV[1] = local_U_dist(local_rng);
                     cam->GenerateRay(x, y, &primary, jitterV);
                 } else {
                     cam->GenerateRay(x, y, &primary);
                 }
-                
-                // trace ray (scene)
+
                 intersected = scene->trace(primary, &isect);
-                
-                // shade this intersection (shader) - remember: depth=0
+
                 if (EnvironmentShader* dshd = dynamic_cast<EnvironmentShader*>(shd)) {
                     color += dshd->shade(intersected, isect, 0, primary.dir);
                 } else {
-                    color += shd->shade(intersected, isect, 0); // fallback genérico
+                    color += shd->shade(intersected, isect, 0);
                 }
-                
-                /*  DEBUGGING */
-                
-                //if (x==100) color.set (0.,255.,0.);
-                //if (y==250) color.set (0.,255.,0.);
-                
+            }
 
-            } // multiple samples
-            // write the result into the image frame buffer (image)
-            img->set(x,y, color*sppf);
-        } // loop over columns
-    }   // loop over rows
+            img->set(x, y, color * sppf);
+        }
+
+        // feedback de progresso (melhor só uma thread)
+        #pragma omp critical
+        {
+            fprintf(stderr, "%d\r", y);
+            fflush(stderr);
+        }
+    }
 }
